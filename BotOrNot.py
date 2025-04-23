@@ -11,14 +11,13 @@ fallback_model_name = "distilbert-base-uncased-finetuned-sst-2-english"
 fallback_model = None
 fallback_tokenizer = None
 
-# Get the directory of the current script
-script_dir = os.path.dirname(os.path.abspath(__file__))
-local_model_path = os.path.join(script_dir, "trained_bot_detector")
+# Explicitly construct the local path
+local_model_path = os.path.join("", "trained_bot_detector")
 
 try:
     model = AutoModelForSequenceClassification.from_pretrained(local_model_path)
     tokenizer = AutoTokenizer.from_pretrained(local_model_path)
-    st.success("Successfully loaded your trained model.")
+    st.success("Successfully loaded your trained model from local directory.")
 except Exception as e:
     st.error(f"Error loading your trained model: {e}")
     st.info(f"Falling back to the '{fallback_model_name}' model.")
@@ -48,13 +47,10 @@ def predict_ai_generated(text):
             logits = outputs.logits
             probabilities = torch.softmax(logits, dim=1)
 
-            # Assuming a binary classification model (check the loaded model's output)
-            # For sentiment analysis, index 1 might be "positive" - adjust accordingly
             if fallback_model_name in model.config.name_or_path:
-                # Adjust for sentiment analysis (positive might be more "human-like"?)
                 ai_probability = 1 - probabilities[0, 1].item()
             else:
-                ai_probability = probabilities[0, 1].item() # Assuming index 1 is "AI-like"
+                ai_probability = probabilities[0, 1].item()
             return ai_probability
     else:
         st.warning("Running in untrained, placeholder mode.")
